@@ -57,9 +57,9 @@ LOGS_FILENAME = 'Game.json'
 ########## Time Limit ###############
 # Creating two players
 # First Player
-First_Player = Player(character="X", type="mcts", time_limit=0.1)
+First_Player = Player(character="X", type="mcts", time_limit=<TEMPLATE>)
 # Second Player
-Second_Player = Player(character="O", type="mcts", time_limit=0.1)
+Second_Player = Player(character="O", type="mcts", time_limit=<TEMPLATE>)
 # Creating the game instance
 Game = TicTacToe(board_size=BOARD_SIZE, char=EMPTY_CHAR,
                  first_player=First_Player, second_player=Second_Player)

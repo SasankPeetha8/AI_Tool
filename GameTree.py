@@ -27,6 +27,8 @@ class Tree():
         self.treeStructure = { }
         # Defining the tree nodes
         self.treeNodes = { }
+        # Button Info
+        self.ButtonInfo = None
         
     # Defining the properties
     @property
@@ -237,9 +239,7 @@ class Tree():
     
     # Defining method to flatten the node trees
     def FlattenNodes(self, treenode):
-        # print(f"Inside the Flatten Node Method")
-        # # Extracting the node i.e., root node
-        # print(f"Current Node State: {treenode.NodeState}, and it's Depth is {treenode.treeDepth}")
+        # If the required key exists in the dictionary
         if treenode.treeDepth in self.treeNodes.keys():
             # extract the states at the current key depth
             states_available = self.FindAvailableStates(self.treeNodes[treenode.treeDepth])
@@ -259,15 +259,8 @@ class Tree():
         for each_child in children_nodes:
             # Checking if the existing key is available in the dictionary
             if each_child.treeDepth in self.treeNodes.keys():
-                # Extracting all the states available at the particular state
-                states_available = self.FindAvailableStates(self.treeNodes[each_child.treeDepth])
-                # Checking if the exisiting state is present or not
-                if each_child.NodeState in states_available:
-                    pass
-                else:
-                    # Appending the node state to the dictionary at particular depth
-                    self.treeNodes[each_child.treeDepth] = self.treeNodes[each_child.treeDepth][:] + [ each_child ]
-                
+                # Appending the node state to the dictionary at particular depth
+                self.treeNodes[each_child.treeDepth] = self.treeNodes[each_child.treeDepth][:] + [ each_child ]
             else:
                 # Appending the new key to the tree nodes dictionary
                 self.treeNodes[each_child.treeDepth] = [ each_child ]

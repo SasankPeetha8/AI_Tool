@@ -10,11 +10,10 @@ import random, sys
 from copy import deepcopy
 # This file consists of all the items added together for the complete GUI Application
 from PySide6.QtWidgets import QApplication, QMainWindow
-from CustomizedCentralWidget import CentralWidget
 from PySide6.QtGui import QScreen
 from PySide6.QtCore import Qt
 import random
-
+from CustomWidget import CustomCentralWidget
 
 # Creating class for defining the MCTS Algorithm
 class MCTS():
@@ -113,6 +112,55 @@ class MCTS():
             else:
                 node = self.Single_Select(node)
     
+    # # Defining the method for node expansion
+    # def Expand_Node(self, node):
+    #     # Displaying message to show the current phase
+    #     print(f" :::::::::: Inside Expand Node :::::::::: ")
+    #     # Fetching the positions from the node state
+    #     positions = node.NodeState
+    #     # Checking if the node is win or draw
+    #     if self.game_object.IsWin(positions) or self.game_object.IsDraw(positions):
+    #         print(f"The selected node is terminal node.\n{node}")
+    #         return node
+        
+    #     # Fetching all the possible states
+    #     available_states = node.PossibleStates
+    #     # # Selecting a random state
+    #     # num = random.randint(0, len(available_states)-1)
+    #     # # Selecting the appropriate state
+    #     # selected_state = available_states[num]
+    #     # # Updating the possible states of the node
+    #     # node.PossibleStates = available_states[:num] + available_states[num+1:]
+    #     # # Updating the node whether the node is leafnode or not
+    #     # if len(node.PossibleStates) == 0:
+        
+    #     # Updating the leafnode status
+    #     node.Is_Leafnode = False
+            
+    #     # Iterating through all the available states
+    #     for index in range(len(available_states)):
+    #         # Creating a new tree node
+    #         new_node = Tree(current_state=available_states[index], possible_states=self.game_object.AvailableStates(available_states[index]), parent=node)
+    #         # Updating the level of the child node
+    #         new_node.treeDepth = node.treeDepth + 1
+    #         # Appending the new node as child node
+    #         node.ChildNodes = node.ChildNodes + [ new_node ]
+    #         # Printing the node state
+    #         print(f"Available States: {index+1}\n{new_node}")
+            
+    #     # # Creating a new tree node
+    #     # new_node = Tree(current_state=selected_state, possible_states=self.game_object.AvailableStates(selected_state), parent=node)
+    #     # # Updating the level of the child node
+    #     # new_node.treeDepth = node.treeDepth + 1
+    #     # # Appending the new node as child node
+    #     # node.ChildNodes = node.ChildNodes + [ new_node ]
+    #     # # Displaying the message
+    #     # Choosing a child node at random
+    #     selected_node = random.choice(node.ChildNodes) if len(node.ChildNodes) > 1 else node.ChildNodes[0]
+    #     print(f"The following node is selected in the Expansion Phase:\n{selected_node}")
+    #     # Returning the newly created child node
+    #     return selected_node
+    
     # Defining the method for node expansion
     def Expand_Node(self, node):
         # Displaying message to show the current phase
@@ -126,41 +174,26 @@ class MCTS():
         
         # Fetching all the possible states
         available_states = node.PossibleStates
-        # # Selecting a random state
-        # num = random.randint(0, len(available_states)-1)
-        # # Selecting the appropriate state
-        # selected_state = available_states[num]
-        # # Updating the possible states of the node
-        # node.PossibleStates = available_states[:num] + available_states[num+1:]
-        # # Updating the node whether the node is leafnode or not
-        # if len(node.PossibleStates) == 0:
-        
-        # Updating the leafnode status
-        node.Is_Leafnode = False
-            
-        # Iterating through all the available states
-        for index in range(len(available_states)):
-            # Creating a new tree node
-            new_node = Tree(current_state=available_states[index], possible_states=self.game_object.AvailableStates(available_states[index]), parent=node)
-            # Updating the level of the child node
-            new_node.treeDepth = node.treeDepth + 1
-            # Appending the new node as child node
-            node.ChildNodes = node.ChildNodes + [ new_node ]
-            # Printing the node state
-            print(f"Available States: {index+1}\n{new_node}")
-            
-        # # Creating a new tree node
-        # new_node = Tree(current_state=selected_state, possible_states=self.game_object.AvailableStates(selected_state), parent=node)
-        # # Updating the level of the child node
-        # new_node.treeDepth = node.treeDepth + 1
-        # # Appending the new node as child node
-        # node.ChildNodes = node.ChildNodes + [ new_node ]
-        # # Displaying the message
-        # Choosing a child node at random
-        selected_node = random.choice(node.ChildNodes) if len(node.ChildNodes) > 1 else node.ChildNodes[0]
-        print(f"The following node is selected in the Expansion Phase:\n{selected_node}")
+        # Selecting a random state
+        num = random.randint(0, len(available_states)-1)
+        # Selecting the appropriate state
+        selected_state = available_states[num]
+        # Updating the possible states of the node
+        node.PossibleStates = available_states[:num] + available_states[num+1:]
+        # Updating the node whether the node is leafnode or not
+        if len(node.PossibleStates) == 0:
+            # Updating the leafnode status
+            node.Is_Leafnode = False
+        # Creating a new tree node
+        new_node = Tree(current_state=selected_state, possible_states=self.game_object.AvailableStates(selected_state), parent=node)
+        # Updating the level of the child node
+        new_node.treeDepth = node.treeDepth + 1
+        # Appending the new node as child node
+        node.ChildNodes = node.ChildNodes + [ new_node ]
+        # Displaying the message
+        print(f"The following node is selected in the Expansion Phase:\n{new_node}")
         # Returning the newly created child node
-        return selected_node           
+        return new_node   
     
     # Defining method to simulate the nodes
     def Simulate_Node(self, node):
@@ -287,11 +320,11 @@ class MCTS():
         print(f"{node.Visualise_Tree(node)}")
         print(f"____________________________________________________")
         print(f"________________Tree Flatten_________________________")
-        # node.FlattenTreeDataStructure(node)
+        node.FlattenTreeDataStructure(node)
         # print(f"{node.treeStructure}")
-        # node.FlattenNodes(node)
+        node.FlattenNodes(node)
         print(f"________________Tree Flatten_________________________")
-        # self.ViewGUI(node)
+        self.ViewGUI(node)
         return node
     
     # Defining method to find the current game state:
@@ -322,35 +355,17 @@ class MCTS():
     def ViewGUI(self, treenode):
         # Checking if the previous instance exists or not
         if not QApplication.instance():
+            # If previous instance doesn't exist then creating a new instance
             application = QApplication(sys.argv)
         else:
+            # If previous instance exists then using the existing instance
             application = QApplication.instance()
-        # Creating an instance of the GUI Application
-        # application = QApplication()
-        # Fetching the application properties
-        SCREEN_SIZE = QScreen.availableGeometry(QApplication.primaryScreen()).getRect()
-        # Specifying the screen size
-        SCREEN_WIDTH = SCREEN_SIZE[2]
-        SCREEN_HEIGHT = SCREEN_SIZE[3]
-        # Specifying the application size
-        APPLICATION_WIDTH = SCREEN_WIDTH//1.5
-        APPLIATION_HEIGHT = SCREEN_HEIGHT//1.5
         
         # Specifying the main window
         main_window = QMainWindow()
-        # Specifying the size of the main window
-        # main_window.resize(1280, 720)
-        main_window.resize(SCREEN_WIDTH, SCREEN_HEIGHT-50)
-        main_window.setWindowState(Qt.WindowMaximized)
-        # print(f"Geometry: {main_window.frameSize()}")
-        # main_window.isMaximized()
-        # main_window.resized
 
         # Creating an instance of the central widget
-        tree_view = CentralWidget(main_window, SCREEN_WIDTH, SCREEN_HEIGHT)
-        # Adding the tree nodes to the structure
-        # Fetching the treeStructure
-        # tree_structure = deepcopy(treenode.treeStructure)
+        central_widget = CustomCentralWidget()
         # Flattenning the nodes
         tree_nodes = deepcopy(treenode.treeNodes)
         # Iterating through all the items in the dictionary
@@ -361,14 +376,16 @@ class MCTS():
             # max_elements = self.FindMaxCount(list_data)
             max_elements = len(list_data)
             # Adding the nodes to the central widget
-            tree_view.addTreeNodes(list_data, max_elements)
+            central_widget.addNodes(list_data, max_elements)
             
-        # Displaying the nodes
-        tree_view.DisplayNodes()
         # Displaying the lines
-        tree_view.ViewLines()
+        central_widget.DisplayLines()
+        # Displaying the nodes
+        central_widget.DisplayNodes()
+        # Displaying the lines
+        # central_widget.ViewLines()
         # Specifying the central widget
-        main_window.setCentralWidget(tree_view.drawLabel)
+        main_window.setCentralWidget(central_widget)
         # Displaying the main window
         main_window.show()
         # Running the application
