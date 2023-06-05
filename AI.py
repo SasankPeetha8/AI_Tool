@@ -320,11 +320,16 @@ class MCTS():
         print(f"{node.Visualise_Tree(node)}")
         print(f"____________________________________________________")
         print(f"________________Tree Flatten_________________________")
-        node.FlattenTreeDataStructure(node)
+        # node.FlattenTreeDataStructure(node)
         # print(f"{node.treeStructure}")
         node.FlattenNodes(node)
+        # Extracting the unique values
+        node.ExtractUniqueNodes(node)
+        print(f"Length of unique nodes: {node.treeStructure}")
         print(f"________________Tree Flatten_________________________")
-        self.ViewGUI(node)
+        # self.ViewGUI(node)
+        self.VisualizeGraphStructure(node)
+        # self.ViewPyViz(node)
         return node
     
     # Defining method to find the current game state:
@@ -405,7 +410,131 @@ class MCTS():
     
     # Defining method to add visualization functionality
     def VisualizeGraphStructure(self, node):
-        # Iterating through all the available child nodes
-        pass
+        # Importing the required modules
+        import matplotlib.pyplot as plt
+        import networkx as nx
+        from networkx.drawing.nx_agraph import graphviz_layout
+        
+        # Creating a new directed graph
+        graph = nx.DiGraph()
+        
+        # Adding nodes to the graph
+        for each_key in node.treeStructure:
+            # Extracting the key value
+            node_value = node.treeStructure[each_key]
+            # Checking if the parent value is empty or not
+            parent_value = node_value.ParentNode
+            # Checking if parent_value is not none
+            if parent_value:
+                # Adding nodes to the graph
+                graph.add_edge(id(parent_value), id(node_value))
+            else:
+                continue
+        
+        dict_values = list(node.treeStructure)
+        # Creating the layout for the nodes
+        # layout = graphviz_layout(graph, prog="twopi", args='', root=id(dict_values[0]))
+        layout = graphviz_layout(graph, prog="twopi", args='')
+        # layout = nx.spring_layout(graph, k=0.5, iterations = 50)
+        # pos = nx.spring_layout(G, k=0.5, iterations=50)
+        # layout = graphviz_layout()
+        
+        # Defining the node size
+        node_size = 20
+        
+        # Iterating until no overlapping is found
+        while True:
+            # Checking if overlapping or not
+            isOverlapping = self.checkOverlapping(deepcopy(layout), node_size)
+            # Updating the values if overlapping
+            if isOverlapping:
+                layout = self.updateLayoutValues(layout, node_size)
+            else:
+                break
+                
+        # Drawing the graph
+        plt.figure(figsize=(10, 10))
+        nx.draw(graph, layout, node_size=20, alpha=0.5, node_color="blue", with_labels=False)
+        # nx.draw_networkx(graph, layout, node_size=10, alpha=0.5, node_color="blue", with_labels=False)
+        plt.axis('equal')
+        # plt.show()
+        # plt.draw()
+        plt.show()
+    
+    
+    
+    # Defining method to update the overlapping values
+    def updateLayoutValues(self, layout, size):
+        # Iterating through all the keys available
+        for each_key in layout:
+            positional_value = layout[each_key]
+            # Updating the x value
+            x_pos = positional_value[0] + size
+            # Updating the y value
+            y_pos = positional_value[1] + size
+            # Updating the values in the keys
+            layout[each_key] = (x_pos, y_pos)
+        # Returning the layout values
+        return layout
+            
+    # Defining method to see if its overlapping
+    def checkOverlapping(self, layout, node_size):
+        # Converting the layout keys to list
+        layout_keys = list(layout.keys())
+        # Updating the node positional values
+        for each_key in range(1, len(layout_keys)):
+            # Checking if the two positional values are overlapping
+            first_node = layout[layout_keys[each_key-1]]
+            second_node = layout[layout_keys[each_key]]
+            # Checking for overlapping
+            # Removing the first element
+            layout.pop(layout_keys[each_key-1])
+            return self.__Overlap(first_node, second_node, node_size) or self.checkOverlapping(layout, node_size)
+    
+    # Defining method to check if two nodes are overlappping
+    def __Overlap(self, obj_1, obj_2, radius):
+        # Calculating the distance between two circles
+        distance = sqrt((obj_1[0]-obj_2[0])**2 + (obj_1[1]-obj_2[1])**2)
+        # Returning the boolean value
+        return True if distance <= radius else False
+    
+    # Defining method to use PyViz
+    def ViewPyViz(self, node):
+        # Importing the required modules
+        import webbrowser
+        from pyvis.network import Network
+        
+        # Creating the network graph
+        graph = Network()
+        # initialising the count to 1
+        count = 1
+        node_values = [ ]
+        # Adding nodes to the graph
+        for each_key in node.treeStructure:
+            # Extracting the key value
+            node_value = node.treeStructure[each_key]
+            # Checking if the parent value is empty or not
+            parent_value = node_value.ParentNode
+            # Checking if parent_value is not none
+            if parent_value:
+                # Checking if the node is added or not
+                if id(parent_value) not in node_values:
+                    graph.add_node(id(parent_value), label=f"{id(parent_value)}")
+                # Checking if the child node is present in the list
+                if id(node_value) not in node_values:
+                # Adding nodes to the graph
+                    graph.add_node(id(node_value), label=f"{id(node_value)}")
+                # Updating the edges
+                graph.add_edge(id(parent_value), id(node_value))
+            else:
+                continue
+            # Updating the count value
+            count = count + 1
+            
+        # Saving the graph as HTML file
+        graph.write_html('graph.html')
+        
+        # Opening the graph in the default web browser
+        webbrowser.open('graph.html')
     
     

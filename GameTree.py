@@ -1,6 +1,7 @@
 # Importing the math module
 from math import sqrt, log10
 from copy import deepcopy
+import itertools
 # Defining the class for the game tree
 class Tree():
     """Defining the class for the game tree"""
@@ -29,6 +30,8 @@ class Tree():
         self.treeNodes = { }
         # Button Info
         self.ButtonInfo = None
+        # Defining unique values
+        self.UniqueValues = [ ]
         
     # Defining the properties
     @property
@@ -224,16 +227,28 @@ class Tree():
         # Returning the tree structure
         # return tree_structure
     
+    def flatten_list(self, nested_list):
+        flattened = []
+        for element in nested_list:
+            if isinstance(element, list):
+                flattened.extend(self.flatten_list(element))
+            else:
+                flattened.append(element)
+        return flattened
+
+    
     # Defining method to find the available states
     def FindAvailableStates(self, list_data):
+        list_data = self.flatten_list(list_data)
         # Initialising the available states
         available_states = [ ]
         # Iterating through all the available states in the list
         for each_node in list_data:
             # Adding each state to the list if not available
-            if each_node.NodeState not in available_states:
-                # Appending the state to the list
-                available_states = available_states + [ each_node.NodeState ]
+            if (each_node != f"None"):
+                if (each_node.NodeState not in available_states):
+                    # Appending the state to the list
+                    available_states = available_states + [ each_node.NodeState ]
         # Returning the states available
         return available_states[:]
     
@@ -247,22 +262,41 @@ class Tree():
             if treenode.NodeState in states_available:
                 pass
             else:
-                self.treeNodes[treenode.treeDepth] = self.treeNodes[treenode.treeDepth][:] + [ treenode ]
+                self.treeNodes[treenode.treeDepth] = self.treeNodes[treenode.treeDepth][:] + [ [treenode ] ]
         # If the tree depth key isn't available in the self tree ndoes
         else:
-            self.treeNodes[treenode.treeDepth] = [ treenode ]
+            self.treeNodes[treenode.treeDepth] = [[ treenode ]]
         
         states_available = [ ]
         # Extracting the child nodes
         children_nodes = treenode.ChildNodes[:]
         # Iterating through all the child nodes
+        requiredNodes = treenode.NodeState.count("-")
+        new_child_nodes = children_nodes
+        while len(new_child_nodes) != requiredNodes:
+            new_child_nodes = new_child_nodes + [ "None" ]
+        # Iterating through all  the child nodes
         for each_child in children_nodes:
             # Checking if the existing key is available in the dictionary
             if each_child.treeDepth in self.treeNodes.keys():
-                # Appending the node state to the dictionary at particular depth
-                self.treeNodes[each_child.treeDepth] = self.treeNodes[each_child.treeDepth][:] + [ each_child ]
+                if new_child_nodes in self.treeNodes[each_child.treeDepth]:
+                    # Appending the node state to the dictionary at particular depth
+                    self.treeNodes[each_child.treeDepth] = self.treeNodes[each_child.treeDepth][:] + [ [new_child_nodes] ]
             else:
                 # Appending the new key to the tree nodes dictionary
-                self.treeNodes[each_child.treeDepth] = [ each_child ]
+                self.treeNodes[each_child.treeDepth] = [ [ new_child_nodes ] ]
             # Continuning with next iteration
             self.FlattenNodes(each_child)
+            
+    # Defining method to extract unique values
+    def ExtractUniqueNodes(self, treenode):
+        # Fetching the id value of the current tree node
+        id_value = id(treenode)
+        # Checking if the current node value is present in the dictionary or not
+        if id_value not in self.treeStructure:
+            # Adding the new id value and tree node to the dictionary
+            self.treeStructure[id_value] = treenode
+            # Continuing with the child values
+            for each_child in treenode.ChildNodes:
+                # Recursively calling the function
+                self.ExtractUniqueNodes(each_child)
